@@ -22,12 +22,23 @@
         <p></p>
         <p></p>
         <p></p>
-        <button id="vote" >Vote</button>
-
+        <table>
+            <tr>
+                <td>
+                    <button id="help" >Help</button>
+                </td>
+                <td>
+                    <button id="vote" >Vote</button>
+                </td>
+            </tr>
+        </table>
         <script>
-         document.getElementById("vote").onclick = function () {
-             window.location.href = "voting.html";
-         };
+        document.getElementById("help").onclick = function () {
+            window.location.href = "help.html";
+        };
+        document.getElementById("vote").onclick = function () {
+            window.location.href = "voting.html";
+        };
         </script>
     </body>
 </html>
