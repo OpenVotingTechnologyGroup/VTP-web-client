@@ -15,8 +15,82 @@
     </head>
     <body>
         <h2>VoteTrackr+ Demo Help</h2>
-        <p>This is a simulated conceptual demo of what voting in an election that is
-            integrated with the VoteTrackr+ technology.</p>
-        <p>Work in Progress</p>
+        <h3>The VoteTrackr+ Guarantee:</h3>
+        <p><b><ul><li>VTP will validate that every ballot has been recorded and tallied correctly with a
+            verifiable guarantee</li>
+            <li>Every voter can validate their per contest votes on their own smart devices, executing
+                the same tallies that election officials can execute, watching their specific votes as
+                well as all the votes get counted</li>
+
+            <li>VTP accomplishes this by:
+                <ol><li>creating special cryptographic records</li><li>giving back to
+                    the voter a personal BUT ALSO anonymous ballot receipt by which the voter can validate
+                    their contest votes and their tallies</li></ol></li></ul></b></p>
+
+        <h3>Background:</h3>
+        <p>This is a simulated demo of a public election integrated with VoteTrackr+ (VTP) as a fully
+            open source plug-in to existing proprietary electronic voting technologies.  VTP
+            can secure and protect traditional paper based elections, mail-in ballot elections of many types,
+            as well as online internet based voting with or without paper based ballots.  VTP can insure
+            elections of all types.  See <a href="overview.html">Overview</a> for more background info.</p>
+
+        <p>VTP individually validates and guarantees that every ballot has been recorded and tallied
+            correctly.  Every voter can validate their ballot choices on their own smart devices,
+            executing the same tallies that election officials execute, watching their and all the votes
+            get counted correctly.</p>
+
+        <p>VTP accomplishes this creating a cryptographic records and given back the voter a personal but
+            also anonymous ballot receipt containing such records by which the voter can validate their
+            vote and its tally.</p>
+
+        <h3>Demo Explanation - how this works and how to vote:</h3>
+        <h4>1) Voting</h4>
+        <p>In this demo, you will be able to vote in five contests:
+            <ol>
+                <li>U.S. President</li>
+                <li>U.S. Senate</li>
+                <li>County Clerk</li>
+                <li>Athletic Director</li>
+                <li>Question 1 - should the starting time of the annual town meeting be moved to 6:30 PM?</li>
+            </ol>
+            Of the five contests, the second contest, <i>U.S. Senate</i>, is a Rank Choice Vote (a.k.a.
+            Instant Runoff Vote) contest.  In this contest you can select up to all the contestants
+            in a rank order.  You can rearrange them after selection by dragging and dropping.</p>
+
+        <p>At the top of each contest there is a progress bar that allows you to jump directly to different
+            contents or go back and revisit previous ones.  The last page is a checkout page where you can
+            review your selections and potentionally change them.</p>
+
+        <h4>2) Casting your ballot</h4>
+        <p>Once you have completed your ballot and are on the checkout page, you can either spoil it
+            to start again or cast it by
+            selecting the <b>VOTE</b> button.  Once clicked, the VTP server will crypographically generate
+            a plethora of cryptographic records and when done, will return a personal <b>AND
+            ANONYMOUS</b> ballot receipt.</p>
+
+        <p>The ballot receipt will monitarily display the single row index in the ballot receipt that is
+            yours.  Please remember this row number.  Once it disappears it is gone from the VTP system.
+            The other rows in the ballot receipt are random other contest votes.  Each column is a
+            different contest.  In other words, each entry in the ballot receipt table is effectively a
+            contest vote.</p>
+
+        <p>Normally, the tallies are not available until after all the polls close <i>even with VTP</i>.
+            However, since this is an introductory demo, this specific demo as been modified so that the tallies are
+            constantly available.  In addition this demo has also been modified so that your specific ballot
+            is more or less tabulated as it is cast.  Normally ballots are randomized in time to
+            isolate the casting time and order from the the tabulation order.  It is not the case
+            with this demo - you will be able to see the tabulation of your ballot within a few moments
+            of casting.</p>
+
+        <h4>3) Verifying your ballot and the tally</h4>
+        <p>To verify your specific ballot, click the row number in the ballot receipt that was
+            momentarily displayed at the top of the ballot receipt page.  If you have forgotten your
+            row number, it is fine if you go back and vote again.</p>
+
+        <p>With your ballot verication page showing, you can click on the cryptographic digest associated
+            with your contest vote to go to the Cast Vote Record (CVR) of your actual contest vote.  From
+            there you can click on the tally and review the tally for that contest, witnessing your
+            vote be counted.  If the contest is a RCV contest, you may see your vote get re-cast to
+            another candidate if your first/current choice candidate has lost a RCV counting round.</p>
     </body>
 </html>
