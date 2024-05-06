@@ -88,8 +88,9 @@ function setActiveContest(contestNum) {
 }
 
 // Will set up the upperSection
-function setUpperSection(contestNum, thisContestName, thisContestValue, checkout=false) {
-    const rootElement = document.getElementById("upperSection");
+function setUpperSections(contestNum, thisContestName, thisContestValue, checkout=false) {
+    const textElement = document.getElementById("textSection");
+    const upperElement = document.getElementById("upperSection");
     const newItem = document.createElement("span");
     if (checkout) {
         // Setup the checkout page
@@ -130,11 +131,11 @@ function setUpperSection(contestNum, thisContestName, thisContestValue, checkout
 `;
         newItem.innerHTML = innerText;
     }
+    textElement.appendChild(newItem);
     const newList = document.createElement("ul");
     newList.setAttribute("id", "sortableList");
     newList.classList.add("noBullets");
-    newItem.appendChild(newList);
-    rootElement.appendChild(newItem);
+    upperElement.appendChild(newList);
 }
 
 // Will set up the lowerSection
@@ -459,6 +460,7 @@ function createNewPage (eventName, thisContestNum, thisContestValue, nextContest
         }
     }
     // 2) clearing out the upper and lower node DOM trees
+    document.getElementById("textSection").replaceChildren();
     document.getElementById("upperSection").replaceChildren();
     document.getElementById("lowerSection").replaceChildren();
     document.getElementById("bottomSection").replaceChildren();
@@ -471,8 +473,8 @@ function createNewPage (eventName, thisContestNum, thisContestValue, nextContest
 }
 
 // Setup the bottom navigation buttons
-function setupBottomNavigation(thisContestNum, nextContestNum, thisContestValue) {
-    const bottomElement = document.getElementById("bottomSection");
+function setupNavigation(thisContestNum, nextContestNum, thisContestValue, section="bottomSection") {
+    const targetElement = document.getElementById(section);
     const newList = document.createElement("ul");
     newList.classList.add("flex-item"); // Apply a class for styling
     newList.classList.add("noBullets");
@@ -500,7 +502,7 @@ function setupBottomNavigation(thisContestNum, nextContestNum, thisContestValue)
     row.appendChild(col2);
     table.appendChild(row);
     // Add to the DOM
-    bottomElement.appendChild(table);
+    targetElement.appendChild(table);
 }
 
 // Helper function to color JSON
@@ -644,7 +646,7 @@ function setupCheckout() {
     // Arbitrarily place the help text in upperSection and the actual
     // selections in the lowerSection and the vote buttons in the
     // bottomSection.
-    setUpperSection(null, "checkout", null, true);
+    setUpperSections(null, "checkout", null, true);
     setLowerSection("checkout", true);
     const rootElement = document.getElementById("choiceList");
     let index = 0;
@@ -685,6 +687,7 @@ function setupCheckout() {
         gotoButton.addEventListener("click", function (e) {
             console.log("Running gotoButton to contest " + index);
             // On a goto button click, clear out the children ...
+            document.getElementById("textSection").replaceChildren();
             document.getElementById("upperSection").replaceChildren();
             document.getElementById("lowerSection").replaceChildren();
             document.getElementById("bottomSection").replaceChildren();
@@ -749,7 +752,7 @@ function setupNewContest(thisContestNum) {
     setActiveContest(thisContestNum);
 
     // Setup the upper and lower sections
-    setUpperSection(thisContestNum, thisContestName, thisContestValue);
+    setUpperSections(thisContestNum, thisContestName, thisContestValue);
     setLowerSection(thisContestValue);
 
     // Note - for the moment let these be globals (until we know more).
@@ -798,7 +801,8 @@ function setupNewContest(thisContestNum) {
     // Setup the bottomSection - this supplies simply "next context/checkout"
     // navigation.  Note - the voter's selection is saved when navigating away
     // from the page - hence it needs _this_ thisContestValue.
-    setupBottomNavigation(thisContestNum, thisContestNum + 1, thisContestValue);
+    setupNavigation(thisContestNum, thisContestNum + 1, thisContestValue, "textSection");
+    setupNavigation(thisContestNum, thisContestNum + 1, thisContestValue, "bottomSection");
 
     // Setup progressBar navigation
     setupProgressBarNavigation(thisContestNum, thisContestValue);
@@ -869,9 +873,9 @@ function setupReceiptPage(ballotReceiptObject) {
 
     // Clear all all three sections
     const upperSection = document.getElementById("upperSection");
-    const lowerSection = document.getElementById("lowerSection");
     upperSection.replaceChildren();
-    lowerSection.replaceChildren();
+    document.getElementById("textSection").replaceChildren();
+    document.getElementById("lowerSection").replaceChildren();
     document.getElementById("bottomSection").replaceChildren();
 
     // Clear the touchscreen event handlers if present
@@ -912,7 +916,7 @@ function setupReceiptPage(ballotReceiptObject) {
         // Create an explicit link
         const qrLink = document.createElement("a");
         qrLink.appendChild(qrElement);
-        qrLink.setAttribute("target", "_blank");
+        qrLink.setAttribute("target", "_self");
         qrLink.title = "QR link to ballot check";
         qrLink.href = `show-versioned-receipt.html?vote_store_id=${vote_store_id}&digest=${ballotReceiptObject.receipt_digest}`;
         upperSpan.appendChild(qrLink)

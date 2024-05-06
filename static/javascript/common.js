@@ -19,7 +19,7 @@ function syntaxHighlightJSON(vote_store_id, jsonString, digestURL=null, contestN
                     let link_p = false;
                     newMatch = newMatch.replace(/([a-fA-F0-9]{40})/g, function (match) {
                         link_p = true;
-                        return `<a target="_blank" href=${digestURL}?vote_store_id=${vote_store_id}&contests=${contestNumber}&digests=${match}>${match}</a>`;
+                        return `<a target="_self" href=${digestURL}?vote_store_id=${vote_store_id}&contests=${contestNumber}&digests=${match}>${match}</a>`;
                     });
                     if (link_p) {
                         return newMatch;
@@ -47,12 +47,12 @@ function syntaxHighlightStdout(vote_store_id, jsonArray, digestURL=null, tallyUR
         // Convert digests to hrefs
         newLine = newLine.replace(/\b([a-fA-F0-9]{40})\b/, function (match) {
             digest = match;
-            return `<a target="_blank" href=${digestURL}?vote_store_id=${vote_store_id}&digest=${digest}>${digest}</a>`;
+            return `<a target="_self" href=${digestURL}?vote_store_id=${vote_store_id}&digest=${digest}>${digest}</a>`;
         });
         // Convert contest uids to hrefs
         if (digest) {
             newLine = newLine.replace(/\b([0-9]{4}\b)/, function (match) {
-                return `<a target="_blank" href=${tallyURL}?vote_store_id=${vote_store_id}&contests=${match}&digests=${digest}>${match}</a>`;
+                return `<a target="_self" href=${tallyURL}?vote_store_id=${vote_store_id}&contests=${match}&digests=${digest}>${match}</a>`;
             });
         }
         // Handle GOOD and BAD lines
@@ -105,7 +105,7 @@ function createReceiptTable(ballotCheckObject, vote_store_id) {
             // table header line
             let innerText = "";
             for (let colIndex = 0; colIndex <  numberOfColumns; colIndex++) {
-                let headerText = `<th><a  href="tally-contests.html?vote_store_id=${vote_store_id}&contests=${ballotCheck[0][colIndex].split(' - ', 2)[0]}" target="_blank">${ballotCheck[0][colIndex].split(' - ', 2)[1]}</a></th>`;
+                let headerText = `<th><a  href="tally-contests.html?vote_store_id=${vote_store_id}&contests=${ballotCheck[0][colIndex].split(' - ', 2)[0]}" target="_self">${ballotCheck[0][colIndex].split(' - ', 2)[1]}</a></th>`;
                 if (colIndex == 0) {
                     headerText = `<th>row index</th>` + headerText;
                 }
@@ -131,9 +131,9 @@ function createReceiptTable(ballotCheckObject, vote_store_id) {
             const uid = ballotCheck[0][colIndex].match(/^\d{4}/);
             digests.push(digest);
             uids.push(uid);
-            innerText += `<td><a target="_blank" class="receiptTD" href="show-contest.html?vote_store_id=${vote_store_id}&digest=${digest}">${digest}</a></td>`;
+            innerText += `<td><a target="_self" class="receiptTD" href="show-contest.html?vote_store_id=${vote_store_id}&digest=${digest}">${digest}</a></td>`;
         }
-        innerText = `<th><a target="_blank" class="receiptTH" href="verify-ballot-row.html?vote_store_id=${vote_store_id}&uids=${uids.join(',')}&digests=${digests.join(',')}">${index}</a></th>${innerText}`;
+        innerText = `<th><a target="_self" class="receiptTH" href="verify-ballot-row.html?vote_store_id=${vote_store_id}&uids=${uids.join(',')}&digests=${digests.join(',')}">${index}</a></th>${innerText}`;
         row.innerHTML = innerText;
         table.appendChild(row);
     }

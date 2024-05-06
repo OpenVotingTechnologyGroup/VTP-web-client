@@ -20,11 +20,11 @@ function addTallyButtons(vote_store_id, contestUID, digest) {
     // add event listeners to the buttons
     tallyButtonBrief.addEventListener("click", function (e) {
         console.log("Running 'Tally Contest (brief)' button");
-        window.open(`tally-contests.html?vote_store_id=${vote_store_id}&contests=${contestUID}&digests=${digest}&verbosity=3`, "_blank").focus();
+        window.location.replace(`tally-contests.html?vote_store_id=${vote_store_id}&contests=${contestUID}&digests=${digest}&verbosity=3`).focus();
     });
     tallyButtonDetails.addEventListener("click", function (e) {
         console.log("Running 'Tally Contest (details)' button");
-        window.open(`tally-contests.html?vote_store_id=${vote_store_id}&contests=${contestUID}&digests=${digest}&verbosity=4`, "_blank").focus();
+        window.location.replace(`tally-contests.html?vote_store_id=${vote_store_id}&contests=${contestUID}&digests=${digest}&verbosity=4`).focus();
     });
     const table = document.createElement("table");
     table.classList.add("tableStyle");
