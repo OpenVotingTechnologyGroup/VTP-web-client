@@ -916,7 +916,7 @@ function setupReceiptPage(ballotReceiptObject) {
         // Create an explicit link
         const qrLink = document.createElement("a");
         qrLink.appendChild(qrElement);
-        qrLink.setAttribute("target", "_self");
+        qrLink.setAttribute("target", "_blank");
         qrLink.title = "QR link to ballot check";
         qrLink.href = `show-versioned-receipt.html?vote_store_id=${vote_store_id}&digest=${ballotReceiptObject.receipt_digest}`;
         upperSpan.appendChild(qrLink)
