@@ -17,3 +17,6 @@ poetry.lock
 
 # manual ignores
 git-ignore
+
+# ignore local assets
+local-assets
