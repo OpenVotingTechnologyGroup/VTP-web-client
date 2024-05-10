@@ -37,12 +37,12 @@ const contestCVRJSON = `{
             "ggo": "GGOs/states/Massachusetts",
             "max_selections": 6,
             "selection": [
-                "4: Emily Echo",
-                "5: Francis Foxtrot",
-                "0: Anthony Alpha",
-                "3: David Delta",
-                "2: Gloria Gamma",
-                "1: Betty Beta"
+                "Emily Echo",
+                "Francis Foxtrot",
+                "Anthony Alpha",
+                "David Delta",
+                "Gloria Gamma",
+                "Betty Beta"
             ],
             "tally": "rcv",
             "uid": "0001",

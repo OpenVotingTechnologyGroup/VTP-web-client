@@ -178,26 +178,19 @@ function setupChoiceList(thisContestName, thisContestValue, overrideChoice=null)
 
         // Create the text element
         const name = document.createElement("span");
-        const extraText = document.createElement("span");
         name.innerHTML = extraSpace;
         // Ugh - need to inspect for the choices data type
         if (choice.name) {
-            name.innerText += choice.name;
+            if (thisContestValue.contest_type == "ticket") {
+                name.innerText += prettyPrintSelection(choice.name, thisContestValue);
+            } else {
+                name.innerText += choice.name;
+            }
             newItem.setAttribute("thename", choice.name);
         } else {
             // Just an array of strings
             name.innerText +=  choice;
             newItem.setAttribute("thename", choice);
-        }
-        if (thisContestValue.contest_type == "ticket") {
-            // Note - need to add this as an additional flex-box
-            // so that the 'name' matches the choice
-            let addendum = [];
-            for (let office of thisContestValue.ticket_titles) {
-                addendum.push(office + ":" + choice.ticket_names);
-            }
-            extraText.innerHTML = extraSpace;
-            extraText.innerText += "[" + addendum.join(", ") + "]";
         }
         // Add the unselected class
         newItem.classList.add("unselected");
@@ -205,7 +198,6 @@ function setupChoiceList(thisContestName, thisContestValue, overrideChoice=null)
         // Append everything ...
         newItem.appendChild(svgIcon);
         newItem.appendChild(name);
-        newItem.appendChild(extraText);
         rootElement.appendChild(newItem);
 
         // If setting just one choice
@@ -437,8 +429,12 @@ function createNewPage (eventName, thisContestNum, thisContestValue, nextContest
         let index = 0;
         for (const choice of document.getElementsByClassName("selected")) {
             const name = choice.children[1].innerText.trim();
-            selection[index] = index + ": " + name;
-            console.log("recording vote: " + index + ": " + name);
+            if (thisContestValue.contest_type == "ticket") {
+                selection[index] = thisContestValue.choices[index]["name"];
+            } else {
+                selection[index] = name;
+            }
+            console.log("recording vote: [" + index + "] " + name);
             index += 1;
         }
         thisContestValue["selection"] = selection;
@@ -614,19 +610,22 @@ function setupProgressBarNavigation(thisContestNum, thisContestValue) {
     barElement.appendChild(barButton)
 }
 
-// Helper function for pretty printing selections
-function smartenSelections(selections, tally) {
-    const arr = [...selections];
-    if (tally == "plurality") {
-        return arr.map((str) => str.replace(/^\d+:\s+/, ""));
-    } else {
-        return arr.map((str) => str.replace(/^\d+/, (match) => parseInt(match, 10) + 1));
+// Helper function for pretty printing selections - handles
+// printing the underlying ticket details if a ticket
+function prettyPrintSelection(selection, contest) {
+    if (contest.contest_type == "ticket") {
+        const details = [];
+        for (const [choiceIndex, ticket] of contest.choices.entries()) {
+            if (ticket["name"] == selection) {
+                for (const [nameIndex, title] of contest.ticket_titles.entries()) {
+                    details.push(title + ": " + contest.choices[choiceIndex].ticket_names[nameIndex]);
+                }
+            }
+        }
+        return selection + " (" + details.join("; ") + ")";
     }
-}
-
-// Helper function to return the selection zer-offset index and name
-function splitSelection(selection) {
-    return selection.split(/:\s+/, 2);
+    // just return the selections
+    return selection;
 }
 
 // Setup the checkout page
@@ -665,13 +664,16 @@ function setupCheckout() {
         const selections = contest.selection;
         index += 1;
         console.log("contest " + index + " (" + contestName + "), selection = " + selections);
-        box1.innerHTML = "Contest " + index + ":&nbsp&nbsp" + contestName;
+        box1.innerHTML = "Contest " + index + ":&nbsp&nbsp" + contestName + "&nbsp&nbsp (tally=" + contest.tally + ")";
         let max = contest.max_selections;
         if (!selections || selections.length == 0) {
             box2.innerHTML = "no selection - skipped";
             box2.classList.add("novotedText");
         } else {
-            box2.innerHTML = smartenSelections(selections, Object.values(contest)[0].tally).join("<br>");
+            box2.innerHTML = "";
+            for (const selection of selections) {
+                box2.innerHTML += prettyPrintSelection(selection, contest) + "<br>";
+            }
             if (selections.length < max) {
                 const extraText = document.createElement("span");
                 extraText.innerHTML = "<br>undervoted - more votes are allowed";
@@ -777,10 +779,9 @@ function setupNewContest(thisContestNum) {
     if (thisContestValue.selection) {
         // loop over selection in order
         for (const selection of thisContestValue.selection) {
-            const indexName = splitSelection(selection);
             // Find the choice in choiceList that matches
             for (const choice of choiceList.children) {
-                if (choice.getAttribute("thename") == indexName[1]) {
+                if (choice.getAttribute("thename") == selection) {
                     if (thisContestValue.tally == "plurality") {
                         // plurality is easier enough to manually update
                         choice.classList.add("selected");
@@ -792,7 +793,7 @@ function setupNewContest(thisContestNum) {
                         // Need to manually update the RCV contest
                         updateRCVContest(choice, thisContestName, thisContestValue)
                     }
-                    console.log("restored " + indexName[0] + ", " + indexName[1]);
+                    console.log("restored " + selection);
                 }
             }
         }
