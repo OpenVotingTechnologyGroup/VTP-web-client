@@ -94,13 +94,18 @@ function setUpperSections(contestNum, thisContestName, thisContestValue, checkou
     const newItem = document.createElement("span");
     if (checkout) {
         // Setup the checkout page
-        let innerText = `<h2>Ballot Checkout</h2><ul>
-<li>Verify that each contest is how you would like to vote.</li>
-<li>You can select the edit button next to any contest re-edit your selection</li>
+        let innerText = `<h2>Ballot Checkout</h2>
+<ul>
+<li>Verify that each contest is how you would like to vote</li>
+<li>You can select the edit contest button (or the contest number in the top progess bar) to re-edit that contest</li>
+<li>Clicking the <b>Start Over</b> button will spoil (destroy) this ballot and take you back to the beginning</li>
 <li>Clicking the <b>VOTE</b> button at the bottom of the page will cast your ballot</li>
-<li>When you cast your ballot, you will receive an anonymous ballot receipt with 100 randomized contest checks</li>
-<li>If you click <b>VOTE and reveal row</b>, in addition to the ballot receipt, you will momentarily be shown your private row number.
-<li>Though the ballot receipt is public, the row number is private.  Revealing your row number AND your ballot receipt will allow others to see how you voted.</li></ul>`;
+<ul>
+<li>When you cast your ballot, you will receive an anonymous ballot receipt with 100 random ballots worth of data</li>
+<li><b>NOTE your private row number</b> at the top of the ballot receipt <i>above</i> the QR code.&nbsp <b>It will only be displayed for 5 seconds and then will disappear forever - please remember it!</b></li>
+</ul>
+<li>Though the ballot receipt itself is public (the QR code points to a permanent copy), the row number is private and not recorded.&nbsp Revealing your row number AND your ballot receipt will allow others to see how you voted.</li>
+</ul>`;
         newItem.innerHTML = innerText;
     } else if (thisContestValue.tally == "plurality") {
         const max = thisContestValue.max_selections;
@@ -724,8 +729,8 @@ function setupCheckout() {
     //    - when integrated with the web-api, will send the modified
     //      blankBallot.json which will re-verify the ballot and
     //      casts it, returning the ballot receipt and row number
-    const spoilButton = setupVoteButtonListener("Spoil Ballot (start over)", rootElement);
-    const voteButton = setupVoteButtonListener("VOTE", rootElement);
+    const spoilButton = setupVoteButtonListener("Start Over (and spoil this ballot)", rootElement);
+    const voteButton = setupVoteButtonListener(" VOTE ", rootElement);
     // Create the table and add them
     const voteTable = document.createElement("table");
     voteTable.classList.add("tableStyle");
