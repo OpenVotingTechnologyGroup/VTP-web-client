@@ -422,7 +422,7 @@ function setupNavigationButtonListener(buttonString, thisContestNum, thisContest
 }
 
 function createNewPage (eventName, thisContestNum, thisContestValue, nextContestNum) {
-    console.log("Running next navigation event listerner (" + eventName + ") for contest " + nextContestNum);
+    console.log("Running next navigation event listerner (" + eventName + ") for contest " + (nextContestNum + 1));
     // On the button click go to the next contest or the checkout screen
     //
     // Going to the next contest involves:
@@ -442,25 +442,32 @@ function createNewPage (eventName, thisContestNum, thisContestValue, nextContest
             console.log("recording vote: [" + index + "] " + name);
             index += 1;
         }
+        // However, when on the checkout page, there is nothing new to
+        // save (and there is no selected items).  That aspect is handled
+        // by not specifying thisContestValue in the listener invocation
+        // elsewhere.
+        console.log("navigation: " + (thisContestNum + 1) + " -> " + (nextContestNum + 1))
+        console.log("existing selection: " + thisContestValue["selection"])
+        console.log("new selection: " + selection)
         thisContestValue["selection"] = selection;
         // and setting the progressBar color
         let max = thisContestValue.max_selections;
         if (!max) {
             max = thisContestValue.choices.length;
         }
-        console.log("");
         if (selection.length == 0) {
-            console.log("Contest " + thisContestNum + " no voted");
+            console.log("Contest " + (thisContestNum + 1) + " no voted");
             setProgressBarColor(thisContestNum, "novotedBG");
         } else if (max == selection.length) {
-            console.log("Contest " + thisContestNum + " voted");
+            console.log("Contest " + (thisContestNum + 1) + " voted");
             setProgressBarColor(thisContestNum, "votedBG");
         } else {
-            console.log("Contest " + thisContestNum + " undervoted voted");
+            console.log("Contest " + (thisContestNum + 1) + " undervoted voted");
             setProgressBarColor(thisContestNum, "undervotedBG");
         }
     }
     // 2) clearing out the upper and lower node DOM trees
+    console.log("Clearing out DOM sections ...");
     document.getElementById("textSection").replaceChildren();
     document.getElementById("upperSection").replaceChildren();
     document.getElementById("lowerSection").replaceChildren();
@@ -469,7 +476,7 @@ function createNewPage (eventName, thisContestNum, thisContestValue, nextContest
     if (nextContestNum < numberOfContests) {
         setupNewContest(nextContestNum);
     } else {
-        setupCheckout();
+        setupCheckout(nextContestNum);
     }
 }
 
@@ -595,6 +602,9 @@ function setupVoteButtonListener(buttonString, rootElement) {
 // each contest page needs to redefine the even listener so to have
 // the correct closure so that it (the navigation away) does the
 // correct thing (as the closure contains the thisContestNum value).
+//
+// And if nothing wants to be saved, then thisContestValue MUST be
+// set to false (nothing).
 function setupProgressBarNavigation(thisContestNum, thisContestValue) {
     // loop over the entire progressBar and replace the event listeners
     for (let index = 0; index < numberOfContests; index++) {
@@ -636,10 +646,17 @@ function prettyPrintSelection(selection, contest) {
 // Setup the checkout page
 // Called from newButton event listener, which means that the 'previous'
 // page contents are still being displayed
-function setupCheckout() {
+function setupCheckout(thisContestNum) {
     console.log("setupCheckout: setting up checkout page");
-    // 1) adjust the progress bars
+    // 1) adjust the progress bars and their navigation
+    // MAJOR SUBTLETY WARNING: when on the checkout page, there is no
+    // active contest so that when navigating away to a contest page,
+    // no voter selection needs/wants to be saved.  So, the progress bar
+    // event listeners need to not save anything - hence the 'false'
+    // below.
+    setProgressBarColor(thisContestNum, "activeContest");
     setActiveContest(numberOfContests);
+    setupProgressBarNavigation(thisContestNum, false);
 
     // 2) loop over the voters selections per contest and create a
     // bordered flex-box li item with a two li item sublist:
@@ -750,7 +767,7 @@ function setupCheckout() {
 // the previous contest selection data is gone by the time this
 // is called.  Just being clear about that.
 function setupNewContest(thisContestNum) {
-    console.log("Running setupNewContest: contest " + thisContestNum);
+    console.log("Running setupNewContest: contest " + (thisContestNum + 1));
     let thisContestValue = listOfContests[thisContestNum];
     let thisContestName = thisContestValue["contest_name"];
 
