@@ -730,7 +730,7 @@ function setupCheckout() {
     //      blankBallot.json which will re-verify the ballot and
     //      casts it, returning the ballot receipt and row number
     const spoilButton = setupVoteButtonListener("Start Over (and spoil this ballot)", rootElement);
-    const voteButton = setupVoteButtonListener(" VOTE ", rootElement);
+    const voteButton = setupVoteButtonListener("VOTE", rootElement);
     // Create the table and add them
     const voteTable = document.createElement("table");
     voteTable.classList.add("tableStyle");
