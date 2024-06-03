@@ -88,18 +88,24 @@ function setActiveContest(contestNum) {
 }
 
 // Will set up the upperSection
-function setUpperSection(contestNum, thisContestName, thisContestValue, checkout=false) {
-    const rootElement = document.getElementById("upperSection");
+function setUpperSections(contestNum, thisContestName, thisContestValue, checkout=false) {
+    const textElement = document.getElementById("textSection");
+    const upperElement = document.getElementById("upperSection");
     const newItem = document.createElement("span");
     if (checkout) {
         // Setup the checkout page
-        let innerText = `<h2>Ballot Checkout</h2><ul>
-<li>Verify that each contest is how you would like to vote.</li>
-<li>You can select the edit button next to any contest re-edit your selection</li>
+        let innerText = `<h2>Ballot Checkout</h2>
+<ul>
+<li>Verify that each contest is how you would like to vote</li>
+<li>You can select the edit contest button (or the contest number in the top progess bar) to re-edit that contest</li>
+<li>Clicking the <b>Start Over</b> button will spoil (destroy) this ballot and take you back to the beginning</li>
 <li>Clicking the <b>VOTE</b> button at the bottom of the page will cast your ballot</li>
-<li>When you cast your ballot, you will receive an anonymous ballot receipt with 100 randomized contest checks</li>
-<li>If you click <b>VOTE and reveal row</b>, in addition to the ballot receipt, you will momentarily be shown your private row number.
-<li>Though the ballot receipt is public, the row number is private.  Revealing your row number AND your ballot receipt will allow others to see how you voted.</li></ul>`;
+<ul>
+<li>When you cast your ballot, you will receive an anonymous ballot receipt with 100 random ballots worth of data</li>
+<li><b>NOTE your private row number</b> at the top of the ballot receipt <i>above</i> the QR code.&nbsp <b>It will only be displayed for 5 seconds and then will disappear forever - please remember it!</b></li>
+</ul>
+<li>Though the ballot receipt itself is public (the QR code points to a permanent copy), the row number is private and not recorded.&nbsp Revealing your row number AND your ballot receipt will allow others to see how you voted.</li>
+</ul>`;
         newItem.innerHTML = innerText;
     } else if (thisContestValue.tally == "plurality") {
         const max = thisContestValue.max_selections;
@@ -130,11 +136,11 @@ function setUpperSection(contestNum, thisContestName, thisContestValue, checkout
 `;
         newItem.innerHTML = innerText;
     }
+    textElement.appendChild(newItem);
     const newList = document.createElement("ul");
     newList.setAttribute("id", "sortableList");
     newList.classList.add("noBullets");
-    newItem.appendChild(newList);
-    rootElement.appendChild(newItem);
+    upperElement.appendChild(newList);
 }
 
 // Will set up the lowerSection
@@ -177,26 +183,19 @@ function setupChoiceList(thisContestName, thisContestValue, overrideChoice=null)
 
         // Create the text element
         const name = document.createElement("span");
-        const extraText = document.createElement("span");
         name.innerHTML = extraSpace;
         // Ugh - need to inspect for the choices data type
         if (choice.name) {
-            name.innerText += choice.name;
+            if (thisContestValue.contest_type == "ticket") {
+                name.innerText += prettyPrintSelection(choice.name, thisContestValue);
+            } else {
+                name.innerText += choice.name;
+            }
             newItem.setAttribute("thename", choice.name);
         } else {
             // Just an array of strings
             name.innerText +=  choice;
             newItem.setAttribute("thename", choice);
-        }
-        if (thisContestValue.contest_type == "ticket") {
-            // Note - need to add this as an additional flex-box
-            // so that the 'name' matches the choice
-            let addendum = [];
-            for (let office of thisContestValue.ticket_titles) {
-                addendum.push(office + ":" + choice.ticket_names);
-            }
-            extraText.innerHTML = extraSpace;
-            extraText.innerText += "[" + addendum.join(", ") + "]";
         }
         // Add the unselected class
         newItem.classList.add("unselected");
@@ -204,7 +203,6 @@ function setupChoiceList(thisContestName, thisContestValue, overrideChoice=null)
         // Append everything ...
         newItem.appendChild(svgIcon);
         newItem.appendChild(name);
-        newItem.appendChild(extraText);
         rootElement.appendChild(newItem);
 
         // If setting just one choice
@@ -424,7 +422,7 @@ function setupNavigationButtonListener(buttonString, thisContestNum, thisContest
 }
 
 function createNewPage (eventName, thisContestNum, thisContestValue, nextContestNum) {
-    console.log("Running next navigation event listerner (" + eventName + ") for contest " + nextContestNum);
+    console.log("Running next navigation event listerner (" + eventName + ") for contest " + (nextContestNum + 1));
     // On the button click go to the next contest or the checkout screen
     //
     // Going to the next contest involves:
@@ -436,29 +434,41 @@ function createNewPage (eventName, thisContestNum, thisContestValue, nextContest
         let index = 0;
         for (const choice of document.getElementsByClassName("selected")) {
             const name = choice.children[1].innerText.trim();
-            selection[index] = index + ": " + name;
-            console.log("recording vote: " + index + ": " + name);
+            if (thisContestValue.contest_type == "ticket") {
+                selection[index] = thisContestValue.choices[index]["name"];
+            } else {
+                selection[index] = name;
+            }
+            console.log("recording vote: [" + index + "] " + name);
             index += 1;
         }
+        // However, when on the checkout page, there is nothing new to
+        // save (and there is no selected items).  That aspect is handled
+        // by not specifying thisContestValue in the listener invocation
+        // elsewhere.
+        console.log("navigation: " + (thisContestNum + 1) + " -> " + (nextContestNum + 1))
+        console.log("existing selection: " + thisContestValue["selection"])
+        console.log("new selection: " + selection)
         thisContestValue["selection"] = selection;
         // and setting the progressBar color
         let max = thisContestValue.max_selections;
         if (!max) {
             max = thisContestValue.choices.length;
         }
-        console.log("");
         if (selection.length == 0) {
-            console.log("Contest " + thisContestNum + " no voted");
+            console.log("Contest " + (thisContestNum + 1) + " no voted");
             setProgressBarColor(thisContestNum, "novotedBG");
         } else if (max == selection.length) {
-            console.log("Contest " + thisContestNum + " voted");
+            console.log("Contest " + (thisContestNum + 1) + " voted");
             setProgressBarColor(thisContestNum, "votedBG");
         } else {
-            console.log("Contest " + thisContestNum + " undervoted voted");
+            console.log("Contest " + (thisContestNum + 1) + " undervoted voted");
             setProgressBarColor(thisContestNum, "undervotedBG");
         }
     }
     // 2) clearing out the upper and lower node DOM trees
+    console.log("Clearing out DOM sections ...");
+    document.getElementById("textSection").replaceChildren();
     document.getElementById("upperSection").replaceChildren();
     document.getElementById("lowerSection").replaceChildren();
     document.getElementById("bottomSection").replaceChildren();
@@ -466,13 +476,13 @@ function createNewPage (eventName, thisContestNum, thisContestValue, nextContest
     if (nextContestNum < numberOfContests) {
         setupNewContest(nextContestNum);
     } else {
-        setupCheckout();
+        setupCheckout(nextContestNum);
     }
 }
 
 // Setup the bottom navigation buttons
-function setupBottomNavigation(thisContestNum, nextContestNum, thisContestValue) {
-    const bottomElement = document.getElementById("bottomSection");
+function setupNavigation(thisContestNum, nextContestNum, thisContestValue, section="bottomSection") {
+    const targetElement = document.getElementById(section);
     const newList = document.createElement("ul");
     newList.classList.add("flex-item"); // Apply a class for styling
     newList.classList.add("noBullets");
@@ -500,7 +510,7 @@ function setupBottomNavigation(thisContestNum, nextContestNum, thisContestValue)
     row.appendChild(col2);
     table.appendChild(row);
     // Add to the DOM
-    bottomElement.appendChild(table);
+    targetElement.appendChild(table);
 }
 
 // Helper function to color JSON
@@ -592,6 +602,9 @@ function setupVoteButtonListener(buttonString, rootElement) {
 // each contest page needs to redefine the even listener so to have
 // the correct closure so that it (the navigation away) does the
 // correct thing (as the closure contains the thisContestNum value).
+//
+// And if nothing wants to be saved, then thisContestValue MUST be
+// set to false (nothing).
 function setupProgressBarNavigation(thisContestNum, thisContestValue) {
     // loop over the entire progressBar and replace the event listeners
     for (let index = 0; index < numberOfContests; index++) {
@@ -612,28 +625,38 @@ function setupProgressBarNavigation(thisContestNum, thisContestValue) {
     barElement.appendChild(barButton)
 }
 
-// Helper function for pretty printing selections
-function smartenSelections(selections, tally) {
-    const arr = [...selections];
-    if (tally == "plurality") {
-        return arr.map((str) => str.replace(/^\d+:\s+/, ""));
-    } else {
-        return arr.map((str) => str.replace(/^\d+/, (match) => parseInt(match, 10) + 1));
+// Helper function for pretty printing selections - handles
+// printing the underlying ticket details if a ticket
+function prettyPrintSelection(selection, contest) {
+    if (contest.contest_type == "ticket") {
+        const details = [];
+        for (const [choiceIndex, ticket] of contest.choices.entries()) {
+            if (ticket["name"] == selection) {
+                for (const [nameIndex, title] of contest.ticket_titles.entries()) {
+                    details.push(title + ": " + contest.choices[choiceIndex].ticket_names[nameIndex]);
+                }
+            }
+        }
+        return selection + " (" + details.join("; ") + ")";
     }
-}
-
-// Helper function to return the selection zer-offset index and name
-function splitSelection(selection) {
-    return selection.split(/:\s+/, 2);
+    // just return the selections
+    return selection;
 }
 
 // Setup the checkout page
 // Called from newButton event listener, which means that the 'previous'
 // page contents are still being displayed
-function setupCheckout() {
+function setupCheckout(thisContestNum) {
     console.log("setupCheckout: setting up checkout page");
-    // 1) adjust the progress bars
+    // 1) adjust the progress bars and their navigation
+    // MAJOR SUBTLETY WARNING: when on the checkout page, there is no
+    // active contest so that when navigating away to a contest page,
+    // no voter selection needs/wants to be saved.  So, the progress bar
+    // event listeners need to not save anything - hence the 'false'
+    // below.
+    setProgressBarColor(thisContestNum, "activeContest");
     setActiveContest(numberOfContests);
+    setupProgressBarNavigation(thisContestNum, false);
 
     // 2) loop over the voters selections per contest and create a
     // bordered flex-box li item with a two li item sublist:
@@ -644,7 +667,7 @@ function setupCheckout() {
     // Arbitrarily place the help text in upperSection and the actual
     // selections in the lowerSection and the vote buttons in the
     // bottomSection.
-    setUpperSection(null, "checkout", null, true);
+    setUpperSections(null, "checkout", null, true);
     setLowerSection("checkout", true);
     const rootElement = document.getElementById("choiceList");
     let index = 0;
@@ -663,13 +686,16 @@ function setupCheckout() {
         const selections = contest.selection;
         index += 1;
         console.log("contest " + index + " (" + contestName + "), selection = " + selections);
-        box1.innerHTML = "Contest " + index + ":&nbsp&nbsp" + contestName;
+        box1.innerHTML = "Contest " + index + ":&nbsp&nbsp" + contestName + "&nbsp&nbsp (tally=" + contest.tally + ")";
         let max = contest.max_selections;
         if (!selections || selections.length == 0) {
             box2.innerHTML = "no selection - skipped";
             box2.classList.add("novotedText");
         } else {
-            box2.innerHTML = smartenSelections(selections, Object.values(contest)[0].tally).join("<br>");
+            box2.innerHTML = "";
+            for (const selection of selections) {
+                box2.innerHTML += prettyPrintSelection(selection, contest) + "<br>";
+            }
             if (selections.length < max) {
                 const extraText = document.createElement("span");
                 extraText.innerHTML = "<br>undervoted - more votes are allowed";
@@ -685,6 +711,7 @@ function setupCheckout() {
         gotoButton.addEventListener("click", function (e) {
             console.log("Running gotoButton to contest " + index);
             // On a goto button click, clear out the children ...
+            document.getElementById("textSection").replaceChildren();
             document.getElementById("upperSection").replaceChildren();
             document.getElementById("lowerSection").replaceChildren();
             document.getElementById("bottomSection").replaceChildren();
@@ -719,7 +746,7 @@ function setupCheckout() {
     //    - when integrated with the web-api, will send the modified
     //      blankBallot.json which will re-verify the ballot and
     //      casts it, returning the ballot receipt and row number
-    const spoilButton = setupVoteButtonListener("Spoil Ballot (start over)", rootElement);
+    const spoilButton = setupVoteButtonListener("Start Over (and spoil this ballot)", rootElement);
     const voteButton = setupVoteButtonListener("VOTE", rootElement);
     // Create the table and add them
     const voteTable = document.createElement("table");
@@ -740,7 +767,7 @@ function setupCheckout() {
 // the previous contest selection data is gone by the time this
 // is called.  Just being clear about that.
 function setupNewContest(thisContestNum) {
-    console.log("Running setupNewContest: contest " + thisContestNum);
+    console.log("Running setupNewContest: contest " + (thisContestNum + 1));
     let thisContestValue = listOfContests[thisContestNum];
     let thisContestName = thisContestValue["contest_name"];
 
@@ -749,7 +776,7 @@ function setupNewContest(thisContestNum) {
     setActiveContest(thisContestNum);
 
     // Setup the upper and lower sections
-    setUpperSection(thisContestNum, thisContestName, thisContestValue);
+    setUpperSections(thisContestNum, thisContestName, thisContestValue);
     setLowerSection(thisContestValue);
 
     // Note - for the moment let these be globals (until we know more).
@@ -774,10 +801,9 @@ function setupNewContest(thisContestNum) {
     if (thisContestValue.selection) {
         // loop over selection in order
         for (const selection of thisContestValue.selection) {
-            const indexName = splitSelection(selection);
             // Find the choice in choiceList that matches
             for (const choice of choiceList.children) {
-                if (choice.getAttribute("thename") == indexName[1]) {
+                if (choice.getAttribute("thename") == selection) {
                     if (thisContestValue.tally == "plurality") {
                         // plurality is easier enough to manually update
                         choice.classList.add("selected");
@@ -789,7 +815,7 @@ function setupNewContest(thisContestNum) {
                         // Need to manually update the RCV contest
                         updateRCVContest(choice, thisContestName, thisContestValue)
                     }
-                    console.log("restored " + indexName[0] + ", " + indexName[1]);
+                    console.log("restored " + selection);
                 }
             }
         }
@@ -798,7 +824,8 @@ function setupNewContest(thisContestNum) {
     // Setup the bottomSection - this supplies simply "next context/checkout"
     // navigation.  Note - the voter's selection is saved when navigating away
     // from the page - hence it needs _this_ thisContestValue.
-    setupBottomNavigation(thisContestNum, thisContestNum + 1, thisContestValue);
+    setupNavigation(thisContestNum, thisContestNum + 1, thisContestValue, "textSection");
+    setupNavigation(thisContestNum, thisContestNum + 1, thisContestValue, "bottomSection");
 
     // Setup progressBar navigation
     setupProgressBarNavigation(thisContestNum, thisContestValue);
@@ -869,9 +896,9 @@ function setupReceiptPage(ballotReceiptObject) {
 
     // Clear all all three sections
     const upperSection = document.getElementById("upperSection");
-    const lowerSection = document.getElementById("lowerSection");
     upperSection.replaceChildren();
-    lowerSection.replaceChildren();
+    document.getElementById("textSection").replaceChildren();
+    document.getElementById("lowerSection").replaceChildren();
     document.getElementById("bottomSection").replaceChildren();
 
     // Clear the touchscreen event handlers if present

@@ -19,7 +19,7 @@ function syntaxHighlightJSON(vote_store_id, jsonString, digestURL=null, contestN
                     let link_p = false;
                     newMatch = newMatch.replace(/([a-fA-F0-9]{40})/g, function (match) {
                         link_p = true;
-                        return `<a target="_blank" href=${digestURL}?vote_store_id=${vote_store_id}&contests=${contestNumber}&digests=${match}>${match}</a>`;
+                        return `<a target="_self" href=${digestURL}?vote_store_id=${vote_store_id}&contests=${contestNumber}&digests=${match}>${match}</a>`;
                     });
                     if (link_p) {
                         return newMatch;
@@ -47,12 +47,12 @@ function syntaxHighlightStdout(vote_store_id, jsonArray, digestURL=null, tallyUR
         // Convert digests to hrefs
         newLine = newLine.replace(/\b([a-fA-F0-9]{40})\b/, function (match) {
             digest = match;
-            return `<a target="_blank" href=${digestURL}?vote_store_id=${vote_store_id}&digest=${digest}>${digest}</a>`;
+            return `<a target="_self" href=${digestURL}?vote_store_id=${vote_store_id}&digest=${digest}>${digest}</a>`;
         });
         // Convert contest uids to hrefs
         if (digest) {
             newLine = newLine.replace(/\b([0-9]{4}\b)/, function (match) {
-                return `<a target="_blank" href=${tallyURL}?vote_store_id=${vote_store_id}&contests=${match}&digests=${digest}>${match}</a>`;
+                return `<a target="_self" href=${tallyURL}?vote_store_id=${vote_store_id}&contests=${match}&digests=${digest}>${match}</a>`;
             });
         }
         // Handle GOOD and BAD lines
