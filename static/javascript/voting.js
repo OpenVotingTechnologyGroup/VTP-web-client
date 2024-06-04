@@ -520,7 +520,7 @@ function nullifyVotingSession() {
 }
 
 // Setup the chechout page vote button
-function setupVoteButtonListener(buttonString, rootElement) {
+function setupVoteButtonListener(buttonString, rootElement, voteButton=null) {
     const newItem = document.createElement("div");
     // Create a next/checkout button
     const newButton = document.createElement("button");
@@ -570,7 +570,11 @@ function setupVoteButtonListener(buttonString, rootElement) {
         return newButton;
     } else {
         // Spoil button
-        newButton.addEventListener("click", function (e) {
+        newButton.addEventListener("click",  ({ target: button }) => {
+            button.insertAdjacentText("afterend", "Destroying Ballot ...");
+            button.remove();
+            // also need to remove the VOTE button
+            voteButton.remove()
             // For now, just print something, destroy the blankBallot,
             // and go to home page
             nullifyVotingSession();
@@ -746,8 +750,8 @@ function setupCheckout(thisContestNum) {
     //    - when integrated with the web-api, will send the modified
     //      blankBallot.json which will re-verify the ballot and
     //      casts it, returning the ballot receipt and row number
-    const spoilButton = setupVoteButtonListener("Start Over (and spoil this ballot)", rootElement);
     const voteButton = setupVoteButtonListener("VOTE", rootElement);
+    const spoilButton = setupVoteButtonListener("Start Over (and spoil this ballot)", rootElement, voteButton);
     // Create the table and add them
     const voteTable = document.createElement("table");
     voteTable.classList.add("tableStyle");
