@@ -468,10 +468,7 @@ function createNewPage (eventName, thisContestNum, thisContestValue, nextContest
     }
     // 2) clearing out the upper and lower node DOM trees
     console.log("Clearing out DOM sections ...");
-    document.getElementById("textSection").replaceChildren();
-    document.getElementById("upperSection").replaceChildren();
-    document.getElementById("lowerSection").replaceChildren();
-    document.getElementById("bottomSection").replaceChildren();
+    clearSections();
     // 3) going somewhere
     if (nextContestNum < numberOfContests) {
         setupNewContest(nextContestNum);
@@ -592,16 +589,24 @@ function setupVoteButtonListener(buttonString, rootElement) {
             // For now, just print something, destroy the blankBallot,
             // and go to home page
             nullifyVotingSession();
+            // And remove the top three sections ...
+            document.getElementById("textSection").replaceChildren();
+            document.getElementById("upperSection").replaceChildren();
+            document.getElementById("lowerSection").replaceChildren();
+            // ... and the bars
+            clearBars();
+            // Add the following elements to the bottomSection
+            const bottom = document.getElementById("bottomSection");
             const newItem = document.createElement("p");
             newItem.innerHTML = "Your ballot has been destroyed.  To vote, click the start over button below";
-            rootElement.appendChild(newItem);
+            bottom.appendChild(newItem);
             // window.location.href = "voting.html";
             const startOverButton = document.createElement("button");
             startOverButton.innerText = "Start over";
             startOverButton.onclick = function () {
                 window.location.href = "index.html";
             };
-            rootElement.appendChild(startOverButton);
+            bottom.appendChild(startOverButton);
         });
         return gSpoilButton;
     }
@@ -729,10 +734,7 @@ function setupCheckout(thisContestNum) {
         gotoButton.addEventListener("click", function (e) {
             console.log("Running gotoButton to contest " + index);
             // On a goto button click, clear out the children ...
-            document.getElementById("textSection").replaceChildren();
-            document.getElementById("upperSection").replaceChildren();
-            document.getElementById("lowerSection").replaceChildren();
-            document.getElementById("bottomSection").replaceChildren();
+            clearSections();
             // ... and goto the contest
             const buttonIdString = Number(this.id.match(/\d+$/)) - 1;
             setupNewContest(buttonIdString);
@@ -782,7 +784,8 @@ function setupCheckout(thisContestNum) {
     row1.appendChild(col1);
     row1.appendChild(col2);
     voteTable.appendChild(row1);
-    rootElement.appendChild(voteTable);
+    // Add spoil/vote buttons to bottomSection
+    document.getElementById("bottomSection").appendChild(voteTable);
 }
 
 // Setup a new contest.  Note - when navigating to a new contest,
@@ -886,6 +889,24 @@ function fadeOut(receiptObject, fade) {
     }, 200);
 }
 
+// Clear out the progress and youAreHereBar bars
+function clearBars() {
+    // Clear out progressBar and progressBar stylesheet - remove everything
+    const progressBar = document.getElementById("progressBar");
+    progressBar.replaceChildren();
+    progressBar.style.backgroundColor = "transparent";
+    // Clear out youAreHereBar
+    document.getElementById("youAreHereBar").replaceChildren();
+}
+
+// Clear out all four sections
+function clearSections() {
+    document.getElementById("textSection").replaceChildren();
+    document.getElementById("upperSection").replaceChildren();
+    document.getElementById("lowerSection").replaceChildren();
+    document.getElementById("bottomSection").replaceChildren();
+}
+
 // DragDropTouch Notes:
 // It turns out that when the DragDropTouch.js was added and the ballot receipt
 // is displayed, all the 'li' items appear to get the same DDT functionality added,
@@ -909,19 +930,11 @@ function setupReceiptPage(ballotReceiptObject) {
     nullifyVotingSession();
 
     // Clear out progressBar and progressBar stylesheet - remove everything
-    const progressBar = document.getElementById("progressBar");
-    progressBar.replaceChildren();
-    progressBar.style.backgroundColor = "transparent";
-
-    // Clear out youAreHereBar
-    document.getElementById("youAreHereBar").replaceChildren();
+    clearBars();
 
     // Clear all all three sections
     const upperSection = document.getElementById("upperSection");
-    upperSection.replaceChildren();
-    document.getElementById("textSection").replaceChildren();
-    document.getElementById("lowerSection").replaceChildren();
-    document.getElementById("bottomSection").replaceChildren();
+    clearSections()
 
     // Clear the touchscreen event handlers if present
     for (const ev in DDTEventListeners) {
