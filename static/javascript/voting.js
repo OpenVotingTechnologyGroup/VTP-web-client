@@ -414,6 +414,7 @@ function setupNavigationButtonListener(buttonString, thisContestNum, thisContest
     // Create a next/checkout button
     const newButton = document.createElement("button");
     newButton.innerText = buttonString;
+    newButton.classList.add("deletable");
     // add an event listener to the button
     newButton.addEventListener("click", function() {
         createNewPage(buttonString, thisContestNum, thisContestValue, nextContestNum);
@@ -566,15 +567,17 @@ function setupVoteButtonListener(buttonString, rootElement) {
                     })
                     .catch(error => console.log("ballot POST returned an error: " + error));
             }
-        });
-        // Change the text on click
-        gVoteButton.addEventListener("click", ({ target: button }) => {
-            button.insertAdjacentText("afterend", "Casting Ballot ...");
-            button.remove();
+            // Clear the bars ...
+            clearBars();
+            // ... and the edit buttons (listeners)
+            clearEventListeners();
+            // Clear the spoil and vote buttons
+            gVoteButton.insertAdjacentText("afterend", "Casting Ballot ...");
+            gVoteButton.remove();
             // Also remove the spoil button (the spoil button buttonString is 34 chars in length)
             // dSpoilButton.insertAdjacentText("afterend", "&nbsp;" * 34);
             gSpoilButton.remove();
-        }, false);
+        });
         return gVoteButton;
     } else {
         // Create a spoil button
@@ -730,6 +733,7 @@ function setupCheckout(thisContestNum) {
         const gotoButton = document.createElement("button");
         gotoButton.innerText = "Edit Contest " + index;
         gotoButton.id = "gotoContest" + index;
+        gotoButton.classList.add("deletable");
         // add an event listener to the button
         gotoButton.addEventListener("click", function (e) {
             console.log("Running gotoButton to contest " + index);
@@ -889,8 +893,20 @@ function fadeOut(receiptObject, fade) {
     }, 200);
 }
 
+// Clear out deletable event listeners
+function clearEventListeners() {
+    const buttons = document.getElementsByClassName("deletable");
+    const count = buttons.length;
+    console.log("Clearing " + count + " deletable buttons");
+    // buttons is a HTMLCollection and not a NodeList
+    for (let i = 0; i < count; i++) {
+        buttons.item(0).remove();
+    }
+}
+
 // Clear out the progress and youAreHereBar bars
 function clearBars() {
+    console.log("Clearing bars");
     // Clear out progressBar and progressBar stylesheet - remove everything
     const progressBar = document.getElementById("progressBar");
     progressBar.replaceChildren();
@@ -901,6 +917,7 @@ function clearBars() {
 
 // Clear out all four sections
 function clearSections() {
+    console.log("Clearing Sections");
     document.getElementById("textSection").replaceChildren();
     document.getElementById("upperSection").replaceChildren();
     document.getElementById("lowerSection").replaceChildren();
