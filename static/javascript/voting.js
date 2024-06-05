@@ -520,16 +520,24 @@ function nullifyVotingSession() {
 }
 
 // Setup the chechout page vote button
-function setupVoteButtonListener(buttonString, rootElement, voteButton=null) {
+// Note - when either button runs, a UX goal is to de-activate both
+// buttons so neither can be further activated.  Without knowing how
+// to solve this well with 'closures' around the event listeners,
+// solving with two global variables to hold the buttons that can
+// then be deleted.
+var gVoteButton = null
+var gSpoilButton = null
+function setupVoteButtonListener(buttonString, rootElement) {
     const newItem = document.createElement("div");
-    // Create a next/checkout button
-    const newButton = document.createElement("button");
-    newButton.innerText = buttonString;
     // add an event listener to the button
-    console.log("Running '" + buttonString + "' eventListener");
+    console.log("Creating '" + buttonString + "' eventListener");
     if (buttonString == "VOTE") {
+        // Create a VOTE button
+        gVoteButton = document.createElement("button");
+        gVoteButton.innerText = buttonString;
         // event listener to cast a ballot
-        newButton.addEventListener("click", function (e) {
+        gVoteButton.addEventListener("click", function (e) {
+            console.log("Running '" + buttonString + "' eventListener");
             if (MOCK_WEBAPI) {
                 try {
                     console.log("parsing mock blank receipt");
@@ -541,7 +549,7 @@ function setupVoteButtonListener(buttonString, rootElement, voteButton=null) {
             } else {
                 // fetch via a post (inline here) the completed ballot and pass
                 // setupReceiptPage(...) as the callback
-                console.log("sending the completed ballot; waiting on receipt");
+                console.log("Uploading ballot; waiting on receipt");
                 fetch(castBallotURL, {
                     method: "POST",
                     headers: {
@@ -563,18 +571,24 @@ function setupVoteButtonListener(buttonString, rootElement, voteButton=null) {
             }
         });
         // Change the text on click
-        newButton.addEventListener("click", ({ target: button }) => {
+        gVoteButton.addEventListener("click", ({ target: button }) => {
             button.insertAdjacentText("afterend", "Casting Ballot ...");
             button.remove();
+            // Also remove the spoil button (the spoil button buttonString is 34 chars in length)
+            // dSpoilButton.insertAdjacentText("afterend", "&nbsp;" * 34);
+            gSpoilButton.remove();
         }, false);
-        return newButton;
+        return gVoteButton;
     } else {
-        // Spoil button
-        newButton.addEventListener("click",  ({ target: button }) => {
+        // Create a spoil button
+        gSpoilButton = document.createElement("button");
+        gSpoilButton.innerText = buttonString;
+        gSpoilButton.addEventListener("click",  ({ target: button }) => {
+            console.log("Running '" + buttonString + "' eventListener");
             button.insertAdjacentText("afterend", "Destroying Ballot ...");
             button.remove();
-            // also need to remove the VOTE button
-            voteButton.remove()
+            // also remove the VOTE button
+            gVoteButton.remove()
             // For now, just print something, destroy the blankBallot,
             // and go to home page
             nullifyVotingSession();
@@ -589,7 +603,7 @@ function setupVoteButtonListener(buttonString, rootElement, voteButton=null) {
             };
             rootElement.appendChild(startOverButton);
         });
-        return newButton;
+        return gSpoilButton;
     }
     // } else {
     //     alert("Unsupported/unimplemented function '" + buttonString + "'");
@@ -751,13 +765,17 @@ function setupCheckout(thisContestNum) {
     //      blankBallot.json which will re-verify the ballot and
     //      casts it, returning the ballot receipt and row number
     const voteButton = setupVoteButtonListener("VOTE", rootElement);
-    const spoilButton = setupVoteButtonListener("Start Over (and spoil this ballot)", rootElement, voteButton);
+    const spoilButton = setupVoteButtonListener("Start Over (and spoil this ballot)", rootElement);
     // Create the table and add them
     const voteTable = document.createElement("table");
     voteTable.classList.add("tableStyle");
     const row1 = document.createElement("tr");
     const col1 = document.createElement("td");
     const col2 = document.createElement("td");
+    // Add class for mininal widths so that when the contents (the buttons) are deleted
+    col1.setAttribute("class", "voteButtons")
+    col2.setAttribute("class", "voteButtons")
+    // nothing moves horizontally
     col2.innerHTML = "&nbsp&nbsp";
     col1.appendChild(spoilButton);
     col2.appendChild(voteButton);

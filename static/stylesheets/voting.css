@@ -99,6 +99,11 @@
     margin: 0;
 }
 
+/* the spoil/vote buttons */
+.voteButtons {
+    width: 20%;
+}
+
 /* For JSON pretty printing */
 pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 .JSONstring { color: green; }
