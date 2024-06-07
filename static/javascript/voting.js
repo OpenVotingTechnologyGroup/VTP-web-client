@@ -484,24 +484,22 @@ function setupNavigation(thisContestNum, nextContestNum, thisContestValue, secti
     const newList = document.createElement("ul");
     newList.classList.add("flex-item"); // Apply a class for styling
     newList.classList.add("noBullets");
-    // For now, always create two buttons (UX TBD later)
+    // The last contest should say go to checkout
     let nextButtonString = "Go to next contest";
     let prevContestNum = thisContestNum - 1;
     if (nextContestNum >= numberOfContests) {
         nextButtonString = "Go to checkout";
     }
     let previousButtonString = "Go to previous contest";
-    if (thisContestNum == 0) {
-        previousButtonString = "Go directly to checkout";
-        prevContestNum = numberOfContests + 1;
-    }
     // Add the buttons as a table
     const table = document.createElement("table");
     table.classList.add("tableStyle");
     const row = document.createElement("tr");
     const col1 = document.createElement("td");
     const col2 = document.createElement("td");
+    if (thisContestNum != 0) {
     col1.appendChild(setupNavigationButtonListener(previousButtonString, thisContestNum, thisContestValue, prevContestNum));
+    }
     col2.innerHTML = "&nbsp&nbsp";
     col2.appendChild(setupNavigationButtonListener(nextButtonString, thisContestNum, thisContestValue, nextContestNum));
     row.appendChild(col1);
