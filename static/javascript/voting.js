@@ -696,6 +696,10 @@ function getNameFromPPSelection(ppTicketString) {
 // page contents are still being displayed
 function setupCheckout(thisContestNum) {
     console.log("setupCheckout: setting up checkout page");
+
+    // Force scroll to the top
+    window.scrollTo(0, 0);
+
     // 1) adjust the progress bars and their navigation
     // MAJOR SUBTLETY WARNING: when on the checkout page, there is no
     // active contest so that when navigating away to a contest page,
@@ -821,6 +825,9 @@ function setupNewContest(thisContestNum) {
     console.log("Running setupNewContest: contest " + (thisContestNum + 1));
     let thisContestValue = listOfContests[thisContestNum];
     let thisContestName = thisContestValue["contest_name"];
+
+    // Force scroll to the top
+    window.scrollTo(0, 0);
 
     // and initialize them
     setProgressBarColor(thisContestNum, "activeContest");
