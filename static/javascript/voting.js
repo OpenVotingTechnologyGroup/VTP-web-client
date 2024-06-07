@@ -150,7 +150,7 @@ function setLowerSection(thisContestValue, checkout=false) {
     if (checkout) {
         newItem.innerHTML = "";
     } else if (thisContestValue.contest_type == "ticket") {
-        newItem.innerHTML = "<h3>Candidates:</h3>";
+        newItem.innerHTML = "<h3>Party Tickets:</h3>";
     } else if (thisContestValue.contest_type == "question") {
         newItem.innerHTML = "<h3>Your selection:</h3>";
     } else {
@@ -422,6 +422,20 @@ function setupNavigationButtonListener(buttonString, thisContestNum, thisContest
     return newButton;
 }
 
+// Just for pretty printing ordinals
+const pluralRule = new Intl.PluralRules("en-US", { type: "ordinal" });
+const pluralSuffixes = new Map([
+  ["one", "st"],
+  ["two", "nd"],
+  ["few", "rd"],
+  ["other", "th"],
+]);
+const formatOrdinals = (n) => {
+  const rule = pluralRule.select(n);
+  const suffix = pluralSuffixes.get(rule);
+  return `${n}${suffix}`;
+};
+
 function createNewPage (eventName, thisContestNum, thisContestValue, nextContestNum) {
     console.log("Running next navigation event listerner (" + eventName + ") for contest " + (nextContestNum + 1));
     // On the button click go to the next contest or the checkout screen
@@ -436,11 +450,11 @@ function createNewPage (eventName, thisContestNum, thisContestValue, nextContest
         for (const choice of document.getElementsByClassName("selected")) {
             const name = choice.children[1].innerText.trim();
             if (thisContestValue.contest_type == "ticket") {
-                selection[index] = thisContestValue.choices[index]["name"];
+                selection[index] = getNameFromPPSelection(name);
             } else {
                 selection[index] = name;
             }
-            console.log("recording vote: [" + index + "] " + name);
+            console.log("recording vote: (" + formatOrdinals(index + 1) + " selection) " + name);
             index += 1;
         }
         // However, when on the checkout page, there is nothing new to
@@ -498,7 +512,7 @@ function setupNavigation(thisContestNum, nextContestNum, thisContestValue, secti
     const col1 = document.createElement("td");
     const col2 = document.createElement("td");
     if (thisContestNum != 0) {
-    col1.appendChild(setupNavigationButtonListener(previousButtonString, thisContestNum, thisContestValue, prevContestNum));
+        col1.appendChild(setupNavigationButtonListener(previousButtonString, thisContestNum, thisContestValue, prevContestNum));
     }
     col2.innerHTML = "&nbsp&nbsp";
     col2.appendChild(setupNavigationButtonListener(nextButtonString, thisContestNum, thisContestValue, nextContestNum));
@@ -650,7 +664,9 @@ function setupProgressBarNavigation(thisContestNum, thisContestValue) {
 }
 
 // Helper function for pretty printing selections - handles
-// printing the underlying ticket details if a ticket
+// printing the underlying ticket details of a ticket.  If
+// contest_type is not ticket, will just return the selection
+// as is (returns the name field).
 function prettyPrintSelection(selection, contest) {
     if (contest.contest_type == "ticket") {
         const details = [];
@@ -665,6 +681,14 @@ function prettyPrintSelection(selection, contest) {
     }
     // just return the selections
     return selection;
+}
+
+// Given the pretty print ticket string, will return just the ticket name field
+// (which is what needs to be recorded as the selection, not the long name)
+// Only called when a ticket.
+function getNameFromPPSelection(ppTicketString) {
+    const details = ppTicketString.split(" (");
+    return details[0];
 }
 
 // Setup the checkout page
