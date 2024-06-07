@@ -110,11 +110,11 @@ function setUpperSections(contestNum, thisContestName, thisContestValue, checkou
     } else if (thisContestValue.tally == "plurality") {
         const max = thisContestValue.max_selections;
         // Setup plurality contest header info
-        let innerText = "<h2>Contest " + (contestNum + 1) + ":&nbsp&nbsp&nbsp" + thisContestName + "</h2><h3>This is a plurality contest:</h3><ul><li>Make you selection by clicking.  Click again to unselect.</li>";
+        let innerText = "<h2>Contest " + (contestNum + 1) + ":&nbsp&nbsp&nbsp" + thisContestName + "</h2><h3>This is a plurality contest:</h3><ul><li>Make your selection by clicking.  Click again to unselect.</li>";
         if (max == 1) {
-            innerText += "<li>You can only make one selection</li></ul>";
+            innerText += "<li>You can only make one selection.</li></ul>";
         } else {
-            innerText += "<li>You can choose upto " + max + "</li></ul>";
+            innerText += "<li>You can choose upto " + max + ".</li></ul>";
         }
         newItem.innerHTML = innerText;
     } else {
@@ -123,7 +123,7 @@ function setUpperSections(contestNum, thisContestName, thisContestValue, checkou
         if (!thisContestValue.choices.length) {
             innerStr = "You can select up to all the candidates";
         } else {
-            innerStr = "You can select up to " + thisContestValue.choices.length + "candidates";
+            innerStr = "You can select up to " + thisContestValue.choices.length + " candidates";
         }
         let innerText = "<h2>Contest " + (contestNum + 1) + ":&nbsp&nbsp&nbsp" + thisContestName + `</h2><h3>This is a RCV contest:</h3>
 <ul>
