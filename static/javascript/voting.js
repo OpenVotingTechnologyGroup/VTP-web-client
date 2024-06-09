@@ -110,11 +110,11 @@ function setUpperSections(contestNum, thisContestName, thisContestValue, checkou
     } else if (thisContestValue.tally == "plurality") {
         const max = thisContestValue.max_selections;
         // Setup plurality contest header info
-        let innerText = "<h2>Contest " + (contestNum + 1) + ":&nbsp&nbsp&nbsp" + thisContestName + "</h2><h3>This is a plurality contest:</h3><ul><li>Make you selection by clicking.  Click again to unselect.</li>";
+        let innerText = "<h2>Contest " + (contestNum + 1) + ":&nbsp&nbsp&nbsp" + thisContestName + "</h2><h3>This is a plurality contest:</h3><ul><li>Make your selection by clicking.  Click again to unselect.</li>";
         if (max == 1) {
-            innerText += "<li>You can only make one selection</li></ul>";
+            innerText += "<li>You can only make one selection.</li></ul>";
         } else {
-            innerText += "<li>You can choose upto " + max + "</li></ul>";
+            innerText += "<li>You can choose upto " + max + ".</li></ul>";
         }
         newItem.innerHTML = innerText;
     } else {
@@ -123,7 +123,7 @@ function setUpperSections(contestNum, thisContestName, thisContestValue, checkou
         if (!thisContestValue.choices.length) {
             innerStr = "You can select up to all the candidates";
         } else {
-            innerStr = "You can select up to " + thisContestValue.choices.length + "candidates";
+            innerStr = "You can select up to " + thisContestValue.choices.length + " candidates";
         }
         let innerText = "<h2>Contest " + (contestNum + 1) + ":&nbsp&nbsp&nbsp" + thisContestName + `</h2><h3>This is a RCV contest:</h3>
 <ul>
@@ -150,7 +150,7 @@ function setLowerSection(thisContestValue, checkout=false) {
     if (checkout) {
         newItem.innerHTML = "";
     } else if (thisContestValue.contest_type == "ticket") {
-        newItem.innerHTML = "<h3>Candidates:</h3>";
+        newItem.innerHTML = "<h3>Party Tickets:</h3>";
     } else if (thisContestValue.contest_type == "question") {
         newItem.innerHTML = "<h3>Your selection:</h3>";
     } else {
@@ -414,12 +414,27 @@ function setupNavigationButtonListener(buttonString, thisContestNum, thisContest
     // Create a next/checkout button
     const newButton = document.createElement("button");
     newButton.innerText = buttonString;
+    newButton.classList.add("deletable");
     // add an event listener to the button
     newButton.addEventListener("click", function() {
         createNewPage(buttonString, thisContestNum, thisContestValue, nextContestNum);
     });
     return newButton;
 }
+
+// Just for pretty printing ordinals
+const pluralRule = new Intl.PluralRules("en-US", { type: "ordinal" });
+const pluralSuffixes = new Map([
+  ["one", "st"],
+  ["two", "nd"],
+  ["few", "rd"],
+  ["other", "th"],
+]);
+const formatOrdinals = (n) => {
+  const rule = pluralRule.select(n);
+  const suffix = pluralSuffixes.get(rule);
+  return `${n}${suffix}`;
+};
 
 function createNewPage (eventName, thisContestNum, thisContestValue, nextContestNum) {
     console.log("Running next navigation event listerner (" + eventName + ") for contest " + (nextContestNum + 1));
@@ -435,11 +450,11 @@ function createNewPage (eventName, thisContestNum, thisContestValue, nextContest
         for (const choice of document.getElementsByClassName("selected")) {
             const name = choice.children[1].innerText.trim();
             if (thisContestValue.contest_type == "ticket") {
-                selection[index] = thisContestValue.choices[index]["name"];
+                selection[index] = getNameFromPPSelection(name);
             } else {
                 selection[index] = name;
             }
-            console.log("recording vote: [" + index + "] " + name);
+            console.log("recording vote: (" + formatOrdinals(index + 1) + " selection) " + name);
             index += 1;
         }
         // However, when on the checkout page, there is nothing new to
@@ -468,10 +483,7 @@ function createNewPage (eventName, thisContestNum, thisContestValue, nextContest
     }
     // 2) clearing out the upper and lower node DOM trees
     console.log("Clearing out DOM sections ...");
-    document.getElementById("textSection").replaceChildren();
-    document.getElementById("upperSection").replaceChildren();
-    document.getElementById("lowerSection").replaceChildren();
-    document.getElementById("bottomSection").replaceChildren();
+    clearSections();
     // 3) going somewhere
     if (nextContestNum < numberOfContests) {
         setupNewContest(nextContestNum);
@@ -486,24 +498,22 @@ function setupNavigation(thisContestNum, nextContestNum, thisContestValue, secti
     const newList = document.createElement("ul");
     newList.classList.add("flex-item"); // Apply a class for styling
     newList.classList.add("noBullets");
-    // For now, always create two buttons (UX TBD later)
+    // The last contest should say go to checkout
     let nextButtonString = "Go to next contest";
     let prevContestNum = thisContestNum - 1;
     if (nextContestNum >= numberOfContests) {
         nextButtonString = "Go to checkout";
     }
     let previousButtonString = "Go to previous contest";
-    if (thisContestNum == 0) {
-        previousButtonString = "Go directly to checkout";
-        prevContestNum = numberOfContests + 1;
-    }
     // Add the buttons as a table
     const table = document.createElement("table");
     table.classList.add("tableStyle");
     const row = document.createElement("tr");
     const col1 = document.createElement("td");
     const col2 = document.createElement("td");
-    col1.appendChild(setupNavigationButtonListener(previousButtonString, thisContestNum, thisContestValue, prevContestNum));
+    if (thisContestNum != 0) {
+        col1.appendChild(setupNavigationButtonListener(previousButtonString, thisContestNum, thisContestValue, prevContestNum));
+    }
     col2.innerHTML = "&nbsp&nbsp";
     col2.appendChild(setupNavigationButtonListener(nextButtonString, thisContestNum, thisContestValue, nextContestNum));
     row.appendChild(col1);
@@ -520,16 +530,24 @@ function nullifyVotingSession() {
 }
 
 // Setup the chechout page vote button
+// Note - when either button runs, a UX goal is to de-activate both
+// buttons so neither can be further activated.  Without knowing how
+// to solve this well with 'closures' around the event listeners,
+// solving with two global variables to hold the buttons that can
+// then be deleted.
+var gVoteButton = null
+var gSpoilButton = null
 function setupVoteButtonListener(buttonString, rootElement) {
     const newItem = document.createElement("div");
-    // Create a next/checkout button
-    const newButton = document.createElement("button");
-    newButton.innerText = buttonString;
     // add an event listener to the button
-    console.log("Running '" + buttonString + "' eventListener");
+    console.log("Creating '" + buttonString + "' eventListener");
     if (buttonString == "VOTE") {
+        // Create a VOTE button
+        gVoteButton = document.createElement("button");
+        gVoteButton.innerText = buttonString;
         // event listener to cast a ballot
-        newButton.addEventListener("click", function (e) {
+        gVoteButton.addEventListener("click", function (e) {
+            console.log("Running '" + buttonString + "' eventListener");
             if (MOCK_WEBAPI) {
                 try {
                     console.log("parsing mock blank receipt");
@@ -541,7 +559,7 @@ function setupVoteButtonListener(buttonString, rootElement) {
             } else {
                 // fetch via a post (inline here) the completed ballot and pass
                 // setupReceiptPage(...) as the callback
-                console.log("sending the completed ballot; waiting on receipt");
+                console.log("Uploading ballot; waiting on receipt");
                 fetch(castBallotURL, {
                     method: "POST",
                     headers: {
@@ -561,31 +579,51 @@ function setupVoteButtonListener(buttonString, rootElement) {
                     })
                     .catch(error => console.log("ballot POST returned an error: " + error));
             }
+            // Clear the bars ...
+            clearBars();
+            // ... and the edit buttons (listeners)
+            clearEventListeners();
+            // Clear the spoil and vote buttons
+            gVoteButton.insertAdjacentText("afterend", "Casting Ballot ...");
+            gVoteButton.remove();
+            // Also remove the spoil button (the spoil button buttonString is 34 chars in length)
+            // dSpoilButton.insertAdjacentText("afterend", "&nbsp;" * 34);
+            gSpoilButton.remove();
         });
-        // Change the text on click
-        newButton.addEventListener("click", ({ target: button }) => {
-            button.insertAdjacentText("afterend", "Casting Ballot ...");
-            button.remove();
-        }, false);
-        return newButton;
+        return gVoteButton;
     } else {
-        // Spoil button
-        newButton.addEventListener("click", function (e) {
+        // Create a spoil button
+        gSpoilButton = document.createElement("button");
+        gSpoilButton.innerText = buttonString;
+        gSpoilButton.addEventListener("click",  ({ target: button }) => {
+            console.log("Running '" + buttonString + "' eventListener");
+            button.insertAdjacentText("afterend", "Destroying Ballot ...");
+            button.remove();
+            // also remove the VOTE button
+            gVoteButton.remove()
             // For now, just print something, destroy the blankBallot,
             // and go to home page
             nullifyVotingSession();
+            // And remove the top three sections ...
+            document.getElementById("textSection").replaceChildren();
+            document.getElementById("upperSection").replaceChildren();
+            document.getElementById("lowerSection").replaceChildren();
+            // ... and the bars
+            clearBars();
+            // Add the following elements to the bottomSection
+            const bottom = document.getElementById("bottomSection");
             const newItem = document.createElement("p");
             newItem.innerHTML = "Your ballot has been destroyed.  To vote, click the start over button below";
-            rootElement.appendChild(newItem);
+            bottom.appendChild(newItem);
             // window.location.href = "voting.html";
             const startOverButton = document.createElement("button");
             startOverButton.innerText = "Start over";
             startOverButton.onclick = function () {
                 window.location.href = "index.html";
             };
-            rootElement.appendChild(startOverButton);
+            bottom.appendChild(startOverButton);
         });
-        return newButton;
+        return gSpoilButton;
     }
     // } else {
     //     alert("Unsupported/unimplemented function '" + buttonString + "'");
@@ -626,7 +664,9 @@ function setupProgressBarNavigation(thisContestNum, thisContestValue) {
 }
 
 // Helper function for pretty printing selections - handles
-// printing the underlying ticket details if a ticket
+// printing the underlying ticket details of a ticket.  If
+// contest_type is not ticket, will just return the selection
+// as is (returns the name field).
 function prettyPrintSelection(selection, contest) {
     if (contest.contest_type == "ticket") {
         const details = [];
@@ -643,11 +683,23 @@ function prettyPrintSelection(selection, contest) {
     return selection;
 }
 
+// Given the pretty print ticket string, will return just the ticket name field
+// (which is what needs to be recorded as the selection, not the long name)
+// Only called when a ticket.
+function getNameFromPPSelection(ppTicketString) {
+    const details = ppTicketString.split(" (");
+    return details[0];
+}
+
 // Setup the checkout page
 // Called from newButton event listener, which means that the 'previous'
 // page contents are still being displayed
 function setupCheckout(thisContestNum) {
     console.log("setupCheckout: setting up checkout page");
+
+    // Force scroll to the top
+    window.scrollTo(0, 0);
+
     // 1) adjust the progress bars and their navigation
     // MAJOR SUBTLETY WARNING: when on the checkout page, there is no
     // active contest so that when navigating away to a contest page,
@@ -707,14 +759,12 @@ function setupCheckout(thisContestNum) {
         const gotoButton = document.createElement("button");
         gotoButton.innerText = "Edit Contest " + index;
         gotoButton.id = "gotoContest" + index;
+        gotoButton.classList.add("deletable");
         // add an event listener to the button
         gotoButton.addEventListener("click", function (e) {
             console.log("Running gotoButton to contest " + index);
             // On a goto button click, clear out the children ...
-            document.getElementById("textSection").replaceChildren();
-            document.getElementById("upperSection").replaceChildren();
-            document.getElementById("lowerSection").replaceChildren();
-            document.getElementById("bottomSection").replaceChildren();
+            clearSections();
             // ... and goto the contest
             const buttonIdString = Number(this.id.match(/\d+$/)) - 1;
             setupNewContest(buttonIdString);
@@ -746,21 +796,26 @@ function setupCheckout(thisContestNum) {
     //    - when integrated with the web-api, will send the modified
     //      blankBallot.json which will re-verify the ballot and
     //      casts it, returning the ballot receipt and row number
-    const spoilButton = setupVoteButtonListener("Start Over (and spoil this ballot)", rootElement);
     const voteButton = setupVoteButtonListener("VOTE", rootElement);
+    const spoilButton = setupVoteButtonListener("Start Over (and spoil this ballot)", rootElement);
     // Create the table and add them
     const voteTable = document.createElement("table");
     voteTable.classList.add("tableStyle");
     const row1 = document.createElement("tr");
     const col1 = document.createElement("td");
     const col2 = document.createElement("td");
+    // Add class for mininal widths so that when the contents (the buttons) are deleted
+    col1.setAttribute("class", "voteButtons")
+    col2.setAttribute("class", "voteButtons")
+    // nothing moves horizontally
     col2.innerHTML = "&nbsp&nbsp";
     col1.appendChild(spoilButton);
     col2.appendChild(voteButton);
     row1.appendChild(col1);
     row1.appendChild(col2);
     voteTable.appendChild(row1);
-    rootElement.appendChild(voteTable);
+    // Add spoil/vote buttons to bottomSection
+    document.getElementById("bottomSection").appendChild(voteTable);
 }
 
 // Setup a new contest.  Note - when navigating to a new contest,
@@ -770,6 +825,9 @@ function setupNewContest(thisContestNum) {
     console.log("Running setupNewContest: contest " + (thisContestNum + 1));
     let thisContestValue = listOfContests[thisContestNum];
     let thisContestName = thisContestValue["contest_name"];
+
+    // Force scroll to the top
+    window.scrollTo(0, 0);
 
     // and initialize them
     setProgressBarColor(thisContestNum, "activeContest");
@@ -864,6 +922,37 @@ function fadeOut(receiptObject, fade) {
     }, 200);
 }
 
+// Clear out deletable event listeners
+function clearEventListeners() {
+    const buttons = document.getElementsByClassName("deletable");
+    const count = buttons.length;
+    console.log("Clearing " + count + " deletable buttons");
+    // buttons is a HTMLCollection and not a NodeList
+    for (let i = 0; i < count; i++) {
+        buttons.item(0).remove();
+    }
+}
+
+// Clear out the progress and youAreHereBar bars
+function clearBars() {
+    console.log("Clearing bars");
+    // Clear out progressBar and progressBar stylesheet - remove everything
+    const progressBar = document.getElementById("progressBar");
+    progressBar.replaceChildren();
+    progressBar.style.backgroundColor = "transparent";
+    // Clear out youAreHereBar
+    document.getElementById("youAreHereBar").replaceChildren();
+}
+
+// Clear out all four sections
+function clearSections() {
+    console.log("Clearing Sections");
+    document.getElementById("textSection").replaceChildren();
+    document.getElementById("upperSection").replaceChildren();
+    document.getElementById("lowerSection").replaceChildren();
+    document.getElementById("bottomSection").replaceChildren();
+}
+
 // DragDropTouch Notes:
 // It turns out that when the DragDropTouch.js was added and the ballot receipt
 // is displayed, all the 'li' items appear to get the same DDT functionality added,
@@ -887,19 +976,11 @@ function setupReceiptPage(ballotReceiptObject) {
     nullifyVotingSession();
 
     // Clear out progressBar and progressBar stylesheet - remove everything
-    const progressBar = document.getElementById("progressBar");
-    progressBar.replaceChildren();
-    progressBar.style.backgroundColor = "transparent";
-
-    // Clear out youAreHereBar
-    document.getElementById("youAreHereBar").replaceChildren();
+    clearBars();
 
     // Clear all all three sections
     const upperSection = document.getElementById("upperSection");
-    upperSection.replaceChildren();
-    document.getElementById("textSection").replaceChildren();
-    document.getElementById("lowerSection").replaceChildren();
-    document.getElementById("bottomSection").replaceChildren();
+    clearSections()
 
     // Clear the touchscreen event handlers if present
     for (const ev in DDTEventListeners) {

@@ -13,6 +13,8 @@
     text-align: center;
 }
 
+/* Note - the colors on the favicon are: #296218 and #EFF1C9 */
+
 /* colors for completely voted and undervoted and novoted */
 .novotedText {
     color: #FF6B6B;
@@ -97,6 +99,11 @@
 .tableStyle {
     padding: 0;
     margin: 0;
+}
+
+/* the spoil/vote buttons */
+.voteButtons {
+    width: 20%;
 }
 
 /* For JSON pretty printing */
