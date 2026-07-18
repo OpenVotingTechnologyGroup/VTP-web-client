@@ -33,7 +33,7 @@ const contestCVRJSON = `{
             ],
             "contest_name": "U.S. Senate",
             "contest_type": "candidate",
-            "election_upstream_remote": "https://github.com/TrustTheVote-Project/VTP-mock-election.US.16",
+            "election_upstream_remote": "https://github.com/OpenVotingTechnologyGroup/VTP-mock-election.US.17",
             "ggo": "GGOs/states/Massachusetts",
             "max_selections": 6,
             "selection": [

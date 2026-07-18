@@ -12,8 +12,8 @@ Regardless, it is important to note that VoteTrackerPlus technology secures the 
 
 ## Useful Links
 
-The general layout and relationship of the various VTP repos is described in the [VTP-dev-env](https://github.com/TrustTheVote-Project/VTP-dev-env) repository - see the README there first.
+The general layout and relationship of the various VTP repos is described in the [VTP-dev-env](https://github.com/OpenVotingTechnologyGroup/VTP-dev-env) repository - see the README there first.
 
-See the [VoteTrackerPlus](https://github.com/TrustTheVote-Project/VoteTrackerPlus) repository for general VTP design and project information - that repo is the primary VTP repo.
+See the [VoteTrackerPlus](https://github.com/OpenVotingTechnologyGroup/VoteTrackerPlus) repository for general VTP design and project information - that repo is the primary VTP repo.
 
-See the [developer readme](https://github.com/TrustTheVote-Project/VoteTrackerPlus/tree/main/src/vtp) in the VoteTrackerPlus repo for even more details.
+See the [developer readme](https://github.com/OpenVotingTechnologyGroup/VoteTrackerPlus/tree/main/src/vtp) in the VoteTrackerPlus repo for even more details.

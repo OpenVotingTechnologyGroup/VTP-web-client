@@ -6,17 +6,17 @@ The current design target is to create a usable client/voter frontend in a few w
 
 The current tech choice to achieve this is a plain html, css, and javascript implementation.  The current development  environment is Google's devtools, Microsoft's Visual Studio Code, and emacs :-).
 
-See the VoteTracker+ [project page](https://github.com/orgs/TrustTheVote-Project/projects/2/views/1) for status.
+See the VoteTracker+ [project page](https://github.com/orgs/OpenVotingTechnologyGroup/projects/2/views/1) for status.
 
 #### 2. Overall VTP Git Repo Context
 
 Summary of the VTP git repo's:
 
-The [VTP-dev-end](https://github.com/TrustTheVote-Project/VTP-dev-env) holds/defines the VTP development/run-time environment, including the election data repo(s) of choice.  Contained within VTP-dev-end as submodules are four repos:
-- [VTP-mock-election.US.16](https://github.com/TrustTheVote-Project/VTP-mock-election.US.16) - contains the election configuration and data
-- [VTP-web-api](https://github.com/TrustTheVote-Project/VTP-web-api) - contains the FASTapi rest interface
-- [VoteTrackerPlus](https://github.com/TrustTheVote-Project/VoteTrackerPlus) - contains the python backend code
-- this repo, [VTP-web-client](https://github.com/TrustTheVote-Project/VTP-web-client) contains the client frontend a.k.a. the voter's /UI/UX
+The [VTP-dev-end](https://github.com/OpenVotingTechnologyGroup/VTP-dev-env) holds/defines the VTP development/run-time environment, including the election data repo(s) of choice.  Contained within VTP-dev-end as submodules are four repos:
+- [VTP-mock-election.US.17](https://github.com/OpenVotingTechnologyGroup/VTP-mock-election.US.17) - contains the election configuration and data
+- [VTP-web-api](https://github.com/OpenVotingTechnologyGroup/VTP-web-api) - contains the FASTapi rest interface
+- [VoteTrackerPlus](https://github.com/OpenVotingTechnologyGroup/VoteTrackerPlus) - contains the python backend code
+- this repo, [VTP-web-client](https://github.com/OpenVotingTechnologyGroup/VTP-web-client) contains the client frontend a.k.a. the voter's /UI/UX
 
 See [DesignNotes.md](DesignNotes.md) in this repo for details on the end user (voter) user stories 
 
